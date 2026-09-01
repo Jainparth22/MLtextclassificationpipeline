@@ -1,0 +1,76 @@
+# ============================================================
+# DATA — too large for GitHub (train=73MB, test=37MB)
+# ============================================================
+data/*.csv
+comment-category-prediction-challenge/
+
+# ============================================================
+# OLD WORKING DIRECTORIES — superseded by clean structure
+# ============================================================
+Now submitted Notebook/
+Old submitted Notebooks/
+MLP FV/
+MLP VIVA/
+Notebok/
+# Note: NOT ignoring notebooks/ (lowercase) — that is our clean new folder
+Final Notebook/
+MD/
+Html/
+Guides/
+
+# ============================================================
+# LOOSE ROOT FILES (temp/draft artifacts)
+# ============================================================
+Agent Window Console.log
+implementation_plan.md.resolved
+implementation_plan798
+implementation_plan_ lastst
+task.md.resolved
+taskiojo
+taskxv ds
+viva_guidedscvs
+
+# ============================================================
+# BINARY / LARGE FILES
+# ============================================================
+*.pdf
+*.xlsx
+*.docx
+*.pptx
+MLP SLIDES MERGED.pdf
+MLP_Level1_Viva_Prep_Checklist.pdf
+MLP_Level2_Viva_Prep_Checklist.pdf
+
+# ============================================================
+# PYTHON ARTIFACTS
+# ============================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.env
+.venv
+venv/
+
+# ============================================================
+# JUPYTER / IPYTHON
+# ============================================================
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ============================================================
+# OS / EDITOR
+# ============================================================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+project_retrospective_final
+viva_guide_latest
+implementation_plan_*
