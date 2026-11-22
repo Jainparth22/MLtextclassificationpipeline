@@ -74,3 +74,7 @@ Thumbs.db
 project_retrospective_final
 viva_guide_latest
 implementation_plan_*
+
+# Trained model artifacts (large; regenerate with src/train_export.py)
+src/model_artifacts/*.joblib
+*.joblib

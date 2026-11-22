@@ -1,5 +1,7 @@
 # Milestone 5 — Final Explanation & Viva Preparation
 
+> **Erratum:** this document describes the *course* M5 notebook (seed-averaged LinearSVC, ~0.826). The model submitted to Kaggle in the V1–V7 push was the **V5 stacking ensemble** (0.826); seed averaging was tested in V7 and did not help (-0.0006). Also, the 54 structured features mentioned here were reduced to 19 in V5. See `docs/project_retrospective.md`.
+
 > **This is the final, submission-ready notebook.** It consolidates 9 milestones
 > of experimentation into a clean, comprehensive pipeline.
 

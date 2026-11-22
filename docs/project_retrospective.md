@@ -6,7 +6,7 @@
 **Competition:** Kaggle — Comment Category Prediction Challenge
 **Duration:** Milestones 1 through 5 (7+ notebook versions in M5 alone)
 **Final Score:** 0.826 Macro F1 (Kaggle Public Leaderboard)
-**Final Rank:** ~139–157
+**Final Rank:** ~139–157 (approximate)
 
 ---
 
@@ -36,8 +36,8 @@ Classify online comments into 4 toxicity categories:
 ## 2. Score Progression Timeline
 
 ```
-M1  ████░░░░░░░░░░░░░░░░  ~0.65   MultinomialNB baseline
-M2  ████████░░░░░░░░░░░░  ~0.72   LogisticRegression
+M1  ████░░░░░░░░░░░░░░░░   0.777  LogisticRegression baseline (15k TF-IDF)
+M2  ████░░░░░░░░░░░░░░░░   0.776  Linear models/SGD (val F1 0.809, Kaggle slightly lower)
 M3  ██████████████░░░░░░   0.816   LinearSVC (C=0.1)
 M4  ████████████████░░░░   0.823   Stacking (4→LR)
 M5  █████████████████░░░   0.826   Stacking + 60K features ← FINAL
@@ -51,7 +51,7 @@ M5  █████████████████░░░   0.826   Stack
 | M5 V4 | ROS + SMOTE + LightGBM | OOM crash | ❌ |
 | M5 V5 | Clean (no NLTK, no stems) | 0.826 | Same |
 | M5 V6 | ComplementNB + LGBM meta | 0.787 | -0.039 ❌ |
-| M5 V7 | Chi² + tuning + seed avg | 0.827 | +0.001 |
+| M5 V7 | Chi² + tuning + seed avg | 0.827 (validation only; seed averaging itself hurt by 0.0006, and the submitted file is the V5 stack) | n/a |
 
 ---
 
@@ -136,7 +136,7 @@ M5  █████████████████░░░   0.826   Stack
 |---|---|---|
 | **StandardScaler** | Best | ✅ Won |
 | MinMaxScaler | Slightly worse | ❌ |
-| Log1p + StandardScaler | Comparable | ≈ |
+| Log1p + StandardScaler | Comparable | ≈ (the combination all later scripts use; RobustScaler was never used in code) |
 
 #### Models Trained & Tuned:
 | # | Model | Tuning Method | Parameters Searched | Best Score |
@@ -162,6 +162,7 @@ M5  █████████████████░░░   0.826   Stack
 
 **File:** [milestone_3_nb_knn_svm.py](file:///c:/Users/parth/Desktop/MLP%20P/milestone_3_nb_knn_svm.py)
 **Kaggle Score:** 0.816 (Macro F1) — **MAJOR JUMP (+0.04)**
+> Note: the 0.870 validation F1 quoted for LinearSVC below is a single optimistic split; 5-fold CV was ~0.813, consistent with the 0.816 Kaggle score.
 **M2 Best to beat:** Macro F1 0.828 (validation) / 0.776 (Kaggle)
 
 #### M3 Questions Answered: 10 questions including:
@@ -300,7 +301,7 @@ CV: StratifiedKFold(3)
   - `class_weight="balanced"` → best for ensembles (Stacking 0.826 Kaggle)
   - Custom `{0:1, 1:2, 2:1, 3:6}` → best for standalone LinearSVC (0.822 Kaggle)
 - Expanded to 60K features (35K word + 25K char)
-- Disabled threshold tuning (proven harmful: 0.811 vs 0.818)
+- Disabled threshold tuning (hurt in that run: 0.811 vs 0.818, single split)
 - Reduced retrains from 7 → 3 models (saved ~30 min runtime)
 - **Score:** 0.826
 
@@ -315,8 +316,8 @@ CV: StratifiedKFold(3)
 - **Result:** OOM crash, all techniques hurt
 - **Lesson:** More complexity ≠ better. Each addition was independently tested to be harmful.
 
-#### M5 V5: Clean Slate (PROVEN BEST)
-- **Philosophy:** Strip back to only what's proven
+#### M5 V5: Clean Slate (best observed)
+- **Philosophy:** Strip back to only what helped in earlier runs
 - Removed ALL V4 additions
 - Removed NLTK (illegal library)
 - No stemming, no lemmatization at all
@@ -413,7 +414,7 @@ CV: StratifiedKFold(3)
 |---|---|
 | TF-IDF max_features (60K) | ✅ Implicit selection |
 | TruncatedSVD (200 dims) | ❌ 18.1% variance only |
-| Chi² SelectKBest | ❌ Distorted by abs() on scaled features |
+| Chi² SelectKBest | ❌ Flawed experiment: abs() applied to scaled features, so this says nothing about Chi² itself (should run on the TF-IDF block only) |
 
 ### Meta-learners — 3 Tested
 | Meta-learner | Stacking Score |
@@ -427,7 +428,7 @@ CV: StratifiedKFold(3)
 ## 5. Key Lessons Learned
 
 ### Lesson 1: Simplicity Wins
-V5 (simplest) = V3 (NLTK) = 0.826. Every V4/V6 addition **hurt**. The proven recipe was always: minimal text cleaning + 60K TF-IDF + 4 linear bases + LR meta.
+V5 (simplest) = V3 (NLTK) = 0.826. Every V4/V6 addition **hurt**. The recipe that held up across runs was: minimal text cleaning + 60K TF-IDF + 4 linear bases + LR meta.
 
 ### Lesson 2: NLTK Lemmatization = Zero Value
 Identical Kaggle scores to 5 decimal places (0.82631) with and without lemmatization. TF-IDF trigrams already capture morphological patterns.
@@ -453,7 +454,7 @@ GridSearchCV across [0.01, 0.05, 0.08, 0.1, 0.12, 0.15, 0.2, 0.5] confirmed the 
 ### Lesson 9: Seed Averaging Doesn't Help Stable Models
 Linear models produce nearly identical predictions across seeds. Averaging 5 identical-ish predictions = same prediction (+0.000 gain or slight hurt).
 
-### Lesson 10: The 0.826 Ceiling Is Real
+### Lesson 10: Where the classical approach plateaued
 TF-IDF is a bag-of-words representation — it fundamentally cannot understand:
 - Sarcasm ("Oh yeah, GREAT job!")
 - Context ("I killed it" = positive vs "I'll kill you" = toxic)
@@ -531,7 +532,7 @@ The gap from our 0.826 to top 10's 0.845 is 0.019 — this requires fundamentall
 | Sentence-BERT embeddings | +0.03 to +0.08 | sentence-transformers |
 | GPT-based zero-shot | +0.02 to +0.05 | OpenAI API |
 | FastText embeddings | +0.01 to +0.03 | gensim |
-| NLTK/spaCy preprocessing | ~0.000 (proven) | NLTK |
+| NLTK/spaCy preprocessing | ~0.000 (observed: identical score) | NLTK |
 | Data augmentation (back-translation) | +0.01 to +0.03 | googletrans |
 
 ---
@@ -540,9 +541,9 @@ The gap from our 0.826 to top 10's 0.845 is 0.019 — this requires fundamentall
 
 This project demonstrates the **complete lifecycle of classical ML text classification**, pushed to its theoretical limits:
 
-1. **We exhausted the search space** — 12 models, 6 preprocessing methods, 5 imbalance techniques, 3 feature selection approaches, 3 meta-learners, across 7 notebook iterations.
+1. **Wide, but not exhaustive, search** — 12 models, 6 preprocessing methods, 5 imbalance techniques, 3 feature selection approaches, 3 meta-learners, across 7 notebook iterations.
 
-2. **We found the ceiling** — 0.826 is the maximum achievable with TF-IDF + linear models on this dataset. This is not a failure; it's a rigorous empirical finding.
+2. **A plateau, not a proven ceiling** — 0.826 is the best we reached with TF-IDF + linear models; differences of ~0.001 between top runs are within noise (single splits, no CIs at the time; see results/metrics for CV-based numbers). A plateau is not a failure; it's a rigorous empirical finding.
 
 3. **The biggest insight:** The best ML pipeline is often the simplest one. V5 (minimal cleaning + TF-IDF + 4 linear stackers + LR meta) beat every complex alternative we tried. Every addition of complexity (stemming, SMOTE, tree-based meta-learners, NB ensembles, toxicity features) either had zero effect or actively hurt performance.
 

@@ -61,8 +61,21 @@ Ensemble methods and tree-based models:
 | `v1_feature_expansion.ipynb` | 45k TF-IDF + trigrams + NLTK lemma | 0.826 | Baseline for M5 |
 | `v3_hybrid_strategy.ipynb` | Hybrid class weights + 60k TF-IDF | 0.826 | Same as V1 |
 | `v4_max_attempt.ipynb` | Everything: SMOTE+ROS+LightGBM+pseudo-labeling | OOM crash | ❌ All additions hurt |
-| **`v5_clean_final.ipynb`** | **Stripped back to proven recipe** | **0.826** | **⭐ SUBMITTED** |
+| **`v5_clean_final.ipynb`** | **Stripped back to the recipe that held up** | **0.826** | **⭐ SUBMITTED** |
 | `v6_diversity_experiment.ipynb` | ComplementNB + LightGBM meta-learner | 0.787 | ❌ Worse — diversity ≠ quality |
 | `v7_final_tuning.ipynb` | Chi² + GridSearch C + seed averaging | 0.827 (val) | Marginal; same Kaggle |
 
 **V5 is the definitive version** — it proved that NLTK lemmatization added zero value (identical score to 5 decimal places: 0.82631) and that the simplest clean pipeline is optimal.
+
+
+---
+
+## Colab notebooks (final evaluation)
+
+| Notebook | Purpose |
+|---|---|
+| `colab_final_evaluation.ipynb` | Leak-free 5-fold CV, ablation, hold-out stack vs LinearSVC with bootstrap CIs, error analysis, fairness audit, model export. Outputs go to `results/metrics/`. |
+| `colab_distilbert_extension.ipynb` | Post-competition DistilBERT fine-tune on the same split (GPU) for the accuracy/latency/size trade-off. |
+
+The `milestone_*` and `milestone_5/` notebooks are the original Kaggle runs (training evidence). Add the public
+Kaggle URL of each version here when available.

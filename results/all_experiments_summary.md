@@ -41,7 +41,7 @@
 |---|---|---|
 | Word TF-IDF | **35k**, trigrams, no stop_words removal | 35,000 |
 | Char TF-IDF | **25k**, char_wb, (3,5)-grams | 25,000 |
-| Structured | 19 features (simplified from 54) | 19 |
+| Structured | 19 features (14 numeric + 5 binary; simplified from 54; log1p + StandardScaler) | 19 |
 | **Total** | | **60,019** |
 
 **Key finding:** The final V5/V7 notebooks increased TF-IDF dimensions from 35k to **60k** (35k word + 25k char) and this significantly improved results. Also notably, V5 did NOT use stop_words removal and simplified text cleaning (minimal, no stemming).
@@ -95,7 +95,7 @@
 | SGD | 0.8074 | 9.3s | |
 | PA | 0.7638 | 20.6s | Much worse here |
 | **Stacking (4→LR)** | **0.8267** | 1129s | Best overall |
-| Seed-averaged (5 models) | ~0.826 | — | Final submission |
+| Seed-averaged (5 models) | ~0.826 | — | Tested; did not beat the V5 stack (-0.0006) |
 
 ---
 
@@ -120,11 +120,15 @@
    - Much faster than LogReg on high-dim sparse data
    - `class_weight='balanced'` or custom weights essential
 
-2. **Custom class weights > balanced:**
-   ```python
-   CUSTOM_WEIGHTS = {0: 1.0, 1: 5.5, 2: 1.8, 3: 14.0}
-   ```
-   This produced better results than sklearn's auto-balanced weights.
+2. **Custom class weights beat `balanced` for the stand-alone LinearSVC** (by about 0.002 F1).
+   Different runs used different weights, so there is no single "the" custom set:
+
+   | Where | Weights `{0,1,2,3}` | Used for |
+   |---|---|---|
+   | M4 early guess | `{1, 5.5, 1.8, 14}` | first custom-weight trial |
+   | M4 weight search winner ("moderate") | `{1, 4.5, 2, 12}` | LinearSVC, 80k/60k features (0.828 / 0.826) |
+   | M5 V3/V5 "hybrid" | `{1, 2, 1, 6}` | stand-alone LinearSVC in the V5 script |
+   | M5 V5 stacking/voting | `balanced` (about `{0.43, 3.1, 0.79, 9.1}`) | all ensemble base models |
 
 3. **PA(C=0.01) was M2's star but fell behind in later notebooks:**
    - M2: 0.809 (best) → M5-V7: 0.764 (much worse with 60k features)
@@ -161,8 +165,8 @@
 
 1. Retrain on ALL training data (not just 80%)
 2. Use same TF-IDF/scaler transformers
-3. Generate multiple submissions (LinearSVC, Stacking, Seed-averaged)
-4. **Seed averaging** (V7): train 5 models with different random seeds, average predictions → more robust
+3. Generate multiple submissions (LinearSVC, Stacking, Voting)
+4. Seed averaging (V7) was tried (5 seeds) but did not help: linear models are too stable across seeds
 
 ---
 
@@ -199,7 +203,7 @@
 | M5-V7 | Stacking+SeedAvg | 0.827 | — | 60k, C=0.08 |
 | **M4 (80k)** | **LinearSVC(custom)** | **0.828** | — | **80k features** |
 | **M4 (60k)** | **LinearSVC(custom)** | **0.826** | **0.823** | **60k features** |
-| **M5 Final** | **SeedAvg LinearSVC** | **~0.826** | **0.823** | **60k features** |
+| **M5 Final (submitted, V5)** | **Stacking (4→LR)** | **0.826 (Kaggle)** | — | **60,019 features** |
 
 *M3 submitted 0.870 is a single-split val score (optimistic). CV was 0.813.
 
@@ -232,11 +236,11 @@
 
 ---
 
-## 8. M5 Final Strategy
+## 8. M5 Final Strategy (course-notebook plan; the Kaggle submission was the V5 stack, see above)
 
 M5 consolidates everything that works:
 1. V5-style minimal text cleaning
-2. 60k TF-IDF (35k word + 25k char) — proven sweet spot
+2. 60k TF-IDF (35k word + 25k char) — best observed trade-off
 3. Custom weights "moderate" `{0:1, 1:4.5, 2:2, 3:12}` — hardcoded from M4
 4. LinearSVC(C=0.1) — hardcoded from M4
 5. Seed-averaged predictions (5 seeds) — robust final submission

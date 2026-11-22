@@ -1,0 +1,16 @@
+# Core stack for training / reproducing results (Python 3.10).
+# Versions match the stack stated in the README (scikit-learn 1.3, pandas 2.0, ...).
+# NOTE: the original Kaggle `pip freeze` was not saved in this repo, so these pins are the
+# README's stated versions, not a captured freeze. Running `pip freeze` in the environment
+# that produced your scores and replacing this file is the strictest option.
+numpy==1.24.3
+pandas==2.0.3
+scipy==1.11.1
+scikit-learn==1.3.0
+joblib==1.3.2
+imbalanced-learn==0.11.0   # SMOTE experiments only (not used by the final model)
+xgboost==2.0.3             # M4/M5 experiments only
+lightgbm==4.1.0            # M4/M5 experiments only
+matplotlib==3.7.2
+seaborn==0.12.2
+wordcloud==1.9.2

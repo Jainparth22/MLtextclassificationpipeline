@@ -1,5 +1,7 @@
 # Milestone 3 — Cell-by-Cell Explanation & Viva Preparation
 
+> **Erratum:** passages mentioning `RobustScaler` reflect an earlier plan. The code uses `log1p` + `StandardScaler`. The submitted M5/V5 model uses 19 structured features (not 54) and 60,019 total dimensions.
+
 > This document explains **every design decision** in the Milestone 3 notebook.
 > Use it to defend your methodology during the viva examination.
 

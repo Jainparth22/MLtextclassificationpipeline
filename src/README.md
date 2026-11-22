@@ -1,6 +1,6 @@
 # 🐍 Source Scripts (`src/`)
 
-This folder contains **clean Python scripts** — the same logic as the notebooks, extracted into runnable `.py` files. These are production-quality implementations that can be run directly outside of Kaggle.
+This folder contains **Python scripts** extracted from the notebooks. `milestone_5_final.py` and the serving files run locally via `DATA_DIR`; the earlier milestone scripts are Kaggle-notebook exports with Kaggle data paths.
 
 ---
 
@@ -28,7 +28,7 @@ Complete EDA and baseline pipeline:
 Systematic linear model benchmark:
 - Upgraded identity encoding (one-hot with `has_identity_data` binary)
 - Log1p transforms for skewed features (if_1, if_2, upvote, downvote)
-- RobustScaler (median/IQR) — robust to extreme outliers
+- Log1p transforms + StandardScaler (compared with MinMax; RobustScaler is discussed in the docs but not used in code)
 - 4 TF-IDF configurations (A, B, C, D) evaluated systematically
 - Models: LogReg, SGD (3 losses), Ridge, PassiveAggressive
 - GridSearchCV and RandomizedSearchCV implementations
@@ -65,36 +65,43 @@ Ensemble methods with full experiment log:
 ---
 
 ### `milestone_5_final.py`
-**Lines: ~600 | The definitive submission script**
+**The definitive submission script (the V5 "clean slate" pipeline)**
 
-Consolidated best-of-everything pipeline:
-- V5-style minimal text cleaning (proven optimal)
-- 60k TF-IDF (35k word (1,3)-grams + 25k char_wb (3,5)-grams)
-- 54 structured features with RobustScaler
-- 4-base stacking ensemble → LR meta-learner
-- 5-fold stratified cross-validation
-- Final retraining on ALL 197,999 training samples
-- Multiple submission CSV generation
+- Minimal text cleaning (no stemming, no lemmatization, no NLTK), ~17s
+- 60k TF-IDF (35k word (1,3)-grams + 25k char_wb (3,5)-grams) + 14 numeric + 5 binary features
+  (log1p on skewed columns, StandardScaler) = 60,019 dims
+- Single 80/20 stratified validation split; `class_weight='balanced'` for the ensembles and
+  custom weights `{0:1, 1:2, 2:1, 3:6}` for the stand-alone LinearSVC
+- Stacking (4 base → LR meta), Voting and LinearSVC, retrained on ALL training rows
+- Scored 0.826 Macro F1 on Kaggle, identical (0.82631) to the NLTK version, which showed
+  lemmatization added nothing
+- Reads data from `$DATA_DIR` (default `./data`)
+
+### `milestone_5_v1_nltk_questions.py`
+The M5 V1 script: the course questions Q1–Q10 plus the NLTK-lemmatized pipeline. Kept for the
+record only (NLTK was not permitted by the competition rules).
 
 ---
 
-### `milestone_5_v5_clean.py`
-**The cleanest, leanest version — 16s text cleaning, no illegal libraries**
+### `toxic_pipeline.py`, `train_export.py`, `app.py`
+Serving layer: one scikit-learn transformer that reproduces the V5 features from raw records,
+a script that trains the V5 stack and exports a single `.joblib`, and a FastAPI app that serves it.
+See "Serving the Model" in the top-level README.
 
-Identical score to NLTK version (0.82631 Macro F1 to 5 decimal places), proving that complexity adds nothing. This is the reference implementation.
+### `hashing_sgd_experiment.py`
+Out-of-core experiment: `HashingVectorizer` + `SGDClassifier.partial_fit` over CSV chunks. Not used
+for the 0.826 score; see `docs/scalability_hashing.md`.
 
 ---
 
 ## Running Any Script
 
 ```bash
-# Set up the data path at the top of any script:
-TRAIN_PATH = "data/train.csv"
-TEST_PATH  = "data/test.csv"
-SAMPLE_PATH = "data/Sample.csv"
+# milestone_5_final.py reads DATA_DIR (default ./data). The M1-M4 scripts still contain
+# Kaggle paths (/kaggle/input/comment-category-prediction-challenge/...) near the top; edit them to run locally.
 
 # Run:
-python src/milestone_5_final.py
+DATA_DIR=data python src/milestone_5_final.py
 ```
 
 **Runtime estimate:** ~3–4 hours on a machine with 16GB RAM.

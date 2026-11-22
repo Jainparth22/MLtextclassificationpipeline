@@ -1,5 +1,7 @@
 # Milestone 2 — Cell-by-Cell Explanation & Viva Preparation
 
+> **Erratum:** this document describes `RobustScaler` for the structured features. The code and notebooks (M2 onward) actually use `log1p` + `StandardScaler`; RobustScaler was considered but never used. Treat the RobustScaler passages as design rationale, not what was run.
+
 > This document explains **every design decision** in the Milestone 2 notebook.
 > Use it to defend your methodology during the viva examination.
 

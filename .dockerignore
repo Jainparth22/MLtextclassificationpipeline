@@ -1,0 +1,7 @@
+.git
+data
+notebooks
+docs
+results
+viva_prep
+**/__pycache__
